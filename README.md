@@ -32,15 +32,69 @@ Each layer is independent — adopt one piece or the entire stack.
 | Obsidian | 1.5+ | [obsidian.md](https://obsidian.md/) |
 | Git | Latest | [git-scm.com](https://git-scm.com/) |
 
-### One-Command Setup
+### Download This Repository
 
-After cloning this repo, run:
+You have two options to get these files onto your computer:
+
+#### Option A: Download as ZIP (No Git Required)
+
+1. Go to [github.com/nwfreidline/program-management-build](https://github.com/nwfreidline/program-management-build)
+2. Click the green **"<> Code"** button near the top-right
+3. Click **"Download ZIP"**
+4. Once downloaded, right-click the ZIP file → **"Extract All..."**
+5. Extract to a local folder like `C:\Users\[you]\Documents\Program Management Build\`
+6. You're done — open the folder and continue below
+
+#### Option B: Clone with Git (Recommended — Enables Updates)
+
+This method lets you pull future updates with a single command.
+
+1. **Install Git** (if not already installed):
+   - Download from [git-scm.com](https://git-scm.com/download/win)
+   - Run the installer — accept all defaults (just click Next repeatedly)
+   - Restart any open terminals after install
+
+2. **Open a terminal:**
+   - Press `Win + R`, type `cmd`, press Enter
+   - Or: search "Command Prompt" in the Start menu
+
+3. **Navigate to where you want the folder:**
+   ```
+   cd C:\Users\[you]\Documents
+   ```
+   Replace `[you]` with your Windows username.
+
+4. **Clone the repository:**
+   ```
+   git clone https://github.com/nwfreidline/program-management-build.git
+   ```
+   This creates a `program-management-build` folder with all the files inside.
+
+5. **Enter the folder:**
+   ```
+   cd program-management-build
+   ```
+
+6. **To get future updates** (anytime):
+   ```
+   git pull
+   ```
+
+> **Tip:** If the terminal feels unfamiliar, use Option A (ZIP download). You can always switch to Git later.
+
+---
+
+### Install Python Dependencies
+
+Once you have the files on your machine, run:
 
 ```
 python _scripts\setup-all.py
 ```
 
 This installs Python dependencies for all included apps. Individual app setup is documented in each section's README.
+
+> **First time with Python?** Open the folder in File Explorer, click the address bar at the top (where it shows the folder path), type `cmd`, and press Enter. A terminal opens already pointed at the right location. Then paste the command above.
 
 ---
 
