@@ -1,0 +1,304 @@
+# Program Management Snippet Library for Espanso
+# Install: Copy to %APPDATA%\espanso\match\program-management.yml
+# Reload: espanso restart
+
+matches:
+
+  # ═══════════════════════════════════════════════════════════════
+  # APPROVAL & PROCUREMENT
+  # ═══════════════════════════════════════════════════════════════
+
+  - trigger: ";appreq"
+    replace: |
+      Hi [Recipient],
+
+      Requesting approval for the following:
+
+      - **Description:** [description]
+      - **Estimated Cost:** $[amount]
+      - **Vendor:** [vendor name]
+      - **Budget Line:** [budget category]
+      - **Justification:** [why this is needed]
+
+      Please respond with approval or questions within 7 days of this request.
+
+      Thank you.
+
+  - trigger: ";poreq"
+    replace: |
+      Purchase Order Request
+
+      - **Vendor:** [vendor name]
+      - **Description of Goods/Services:** [what we're buying]
+      - **Quantity:** [amount]
+      - **Unit Price:** $[price]
+      - **Total Cost:** $[total]
+      - **Delivery Date Needed:** [date]
+      - **Approved By:** [approver name and date]
+      - **Cost Center:** [cost center code]
+
+  - trigger: ";quote"
+    replace: |
+      Hi [Requester],
+
+      Per procurement policy, expenditures over $[threshold] require at least 2 competing quotes before approval. Please provide:
+
+      1. Quote from [current vendor]
+      2. Quote from at least one alternative vendor
+
+      Once both quotes are received, we can proceed with approval.
+
+      Thank you.
+
+  - trigger: ";vendor-new"
+    replace: |
+      New Vendor Onboarding Checklist:
+
+      - [ ] Vendor application/registration form completed
+      - [ ] W-9 or tax documentation received
+      - [ ] Insurance certificate on file (if applicable)
+      - [ ] Contract/SOW executed
+      - [ ] Vendor added to payment system
+      - [ ] Primary contact identified and documented
+      - [ ] NDA executed (if applicable)
+      - [ ] Initial PO issued
+
+  # ═══════════════════════════════════════════════════════════════
+  # STATUS UPDATES
+  # ═══════════════════════════════════════════════════════════════
+
+  - trigger: ";status-green"
+    replace: "**Status: 🟢 On Track** — [brief description of progress and next milestone]"
+
+  - trigger: ";status-yellow"
+    replace: "**Status: 🟡 At Risk** — [what's at risk and why]. **Mitigation:** [what we're doing about it]"
+
+  - trigger: ";status-red"
+    replace: "**Status: 🔴 Behind Schedule** — [what's delayed and root cause]. **Recovery Plan:** [specific actions and revised timeline]"
+
+  - trigger: ";weekly"
+    replace: |
+      ## Weekly Status — [Project Name]
+      **Week of:** [date range]
+      **Overall Status:** 🟢 / 🟡 / 🔴
+
+      ### Accomplished This Week
+      - [item 1]
+      - [item 2]
+
+      ### Planned Next Week
+      - [item 1]
+      - [item 2]
+
+      ### Risks / Blockers
+      - [risk or blocker, if any]
+
+      ### Decisions Needed
+      - [decision needed, if any]
+
+  - trigger: ";monthly"
+    replace: |
+      ## Monthly Status Report — [Project Name]
+      **Period:** [Month Year]
+      **Project Manager:** [Name]
+
+      ### Executive Summary
+      [2-3 sentence overview of project health and key developments]
+
+      ### Milestone Progress
+      | Milestone | Target | Status | Notes |
+      |-----------|--------|--------|-------|
+      | [Milestone 1] | [Date] | ✅ / 🔄 / ⚠️ | [Notes] |
+      | [Milestone 2] | [Date] | ✅ / 🔄 / ⚠️ | [Notes] |
+
+      ### Budget Status
+      - **Approved Budget:** $[amount]
+      - **Spent to Date:** $[amount] ([X]%)
+      - **Forecast at Completion:** $[amount]
+
+      ### Key Risks
+      | Risk | Impact | Mitigation |
+      |------|--------|------------|
+      | [Risk] | [H/M/L] | [Action] |
+
+      ### Next Month Focus
+      - [Priority 1]
+      - [Priority 2]
+
+  # ═══════════════════════════════════════════════════════════════
+  # MEETING MANAGEMENT
+  # ═══════════════════════════════════════════════════════════════
+
+  - trigger: ";agenda"
+    replace: |
+      ## Meeting Agenda
+      **Date:** [date]
+      **Time:** [time]
+      **Attendees:** [names]
+
+      ### Topics
+      1. [Topic] — [duration] — [presenter]
+      2. [Topic] — [duration] — [presenter]
+      3. [Topic] — [duration] — [presenter]
+
+      ### Pre-Read
+      - [Link or document to review before meeting]
+
+  - trigger: ";minutes"
+    replace: |
+      ## Meeting Minutes
+      **Date:** [date]
+      **Attendees:** [names]
+      **Absent:** [names]
+
+      ### Discussion
+      - [Key point 1]
+      - [Key point 2]
+
+      ### Decisions
+      - [Decision made and rationale]
+
+      ### Action Items
+      | Action | Owner | Due |
+      |--------|-------|-----|
+      | [action] | [name] | [date] |
+
+      ### Next Meeting: [date/time]
+
+  - trigger: ";action"
+    replace: "**Action:** [what needs to be done] | **Owner:** [who] | **Due:** [date]"
+
+  - trigger: ";decision"
+    replace: "**Decision:** [what was decided] | **Rationale:** [why] | **Decided by:** [who] | **Date:** [date]"
+
+  - trigger: ";followup"
+    replace: |
+      Hi [Name],
+
+      Following up from our meeting on [date]. Here are the key action items:
+
+      1. **[Action]** — Owner: [name] — Due: [date]
+      2. **[Action]** — Owner: [name] — Due: [date]
+
+      Please let me know if anything needs clarification.
+
+      Thanks.
+
+  # ═══════════════════════════════════════════════════════════════
+  # PROJECT COMMUNICATION
+  # ═══════════════════════════════════════════════════════════════
+
+  - trigger: ";kickoff"
+    replace: |
+      Hi team,
+
+      Kicking off [Project Name]. Here's what you need to know:
+
+      **Objective:** [what we're delivering]
+      **Timeline:** [start] → [end]
+      **Key Stakeholders:** [names]
+      **Your Role:** [what's expected of each recipient]
+
+      **Next Steps:**
+      1. [First action item]
+      2. [Second action item]
+
+      Kickoff meeting: [date/time/location]
+
+      Questions? Reply here or grab me directly.
+
+  - trigger: ";escalate"
+    replace: |
+      Hi [Manager/Leader],
+
+      Escalating the following for your attention:
+
+      **Project:** [name]
+      **Issue:** [what's wrong]
+      **Impact:** [what happens if unresolved]
+      **Actions Taken:** [what we've already tried]
+      **Ask:** [what we need from you — decision, resource, air cover]
+      **Deadline:** [when we need resolution by]
+
+      Happy to discuss live. Let me know a good time.
+
+  - trigger: ";milestone"
+    replace: |
+      🎉 **Milestone Achieved: [milestone name]**
+
+      **Project:** [project name]
+      **Completed:** [date]
+      **What was delivered:** [brief description]
+      **Next milestone:** [what's next and when]
+
+      Thanks to [team/individuals] for making this happen.
+
+  - trigger: ";closure"
+    replace: |
+      Hi team,
+
+      **[Project Name] is now complete.** ✅
+
+      **Key Outcomes:**
+      - [Outcome 1]
+      - [Outcome 2]
+      - [Outcome 3]
+
+      **Final Metrics:**
+      - Budget: $[spent] of $[approved] ([X]% utilization)
+      - Timeline: [on time / X days early / X days late]
+      - Scope: [delivered as planned / with changes]
+
+      Lessons learned document: [link]
+
+      Thank you all for your contributions.
+
+  # ═══════════════════════════════════════════════════════════════
+  # DATE/TIME SHORTCUTS
+  # ═══════════════════════════════════════════════════════════════
+
+  - trigger: ";today"
+    replace: "{{today}}"
+    vars:
+      - name: today
+        type: date
+        params:
+          format: "%Y-%m-%d"
+
+  - trigger: ";now"
+    replace: "{{now}}"
+    vars:
+      - name: now
+        type: date
+        params:
+          format: "%Y-%m-%d %H:%M"
+
+  - trigger: ";eow"
+    replace: "{{eow}}"
+    vars:
+      - name: eow
+        type: shell
+        params:
+          cmd: "python -c \"from datetime import date, timedelta; d=date.today(); print((d + timedelta(days=(4-d.weekday())%7)).isoformat())\""
+
+  # ═══════════════════════════════════════════════════════════════
+  # COMMON RESPONSES
+  # ═══════════════════════════════════════════════════════════════
+
+  - trigger: ";ack"
+    replace: "Received, thank you. I'll review and follow up by [date]."
+
+  - trigger: ";delegate"
+    replace: "Adding [name] — they own this area and can help. [Name], can you take a look at the below?"
+
+  - trigger: ";defer"
+    replace: "Thanks for raising this. I'll add it to our backlog for [next quarter/sprint]. Current priorities prevent us from addressing it immediately, but it's tracked."
+
+  - trigger: ";needinfo"
+    replace: |
+      Thanks for this. Before I can proceed, I need:
+
+      1. [Missing information 1]
+      2. [Missing information 2]
+
+      Can you provide by [date]? That will keep us on track for [milestone].

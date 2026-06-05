@@ -1,0 +1,25 @@
+# DocForge Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core — Word (.docx) read/write
+python-docx==1.2.0
+
+# PDF reading
+pdfplumber==0.11.9
+
+# PDF writing (HTML-to-PDF via PyMuPDF)
+PyMuPDF==1.27.2.3
+
+# OCR for image-based/scanned PDFs (requires Tesseract installed on system)
+# Tesseract installer: https://github.com/UB-Mannheim/tesseract/wiki
+pytesseract==0.3.13
+Pillow==11.2.1
+
+# HTML reading + email HTML body parsing
+beautifulsoup4==4.13.5
+
+# Outlook .msg email reading
+extract-msg==0.55.0
+
+# Drag-and-drop support in the GUI (optional — app works without it)
+tkinterdnd2==0.4.3

@@ -1,0 +1,16 @@
+{
+  "grasp": {
+    "executable": "C:\\Users\\nwf\\AppData\\Local\\Toolbox\\bin\\grasp-mcp.exe",
+    "enabled": true
+  },
+  "notifications": {
+    "soundEnabled": true,
+    "persistUntilDismissed": true
+  },
+  "tray": {
+    "showOnStartup": true,
+    "startWithWindows": true
+  },
+  "timezone": "America/Los_Angeles",
+  "theme": "dark"
+}
