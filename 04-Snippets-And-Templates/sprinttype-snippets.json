@@ -1,0 +1,106 @@
+[
+  {
+    "shortcut": "//approval",
+    "expansion": "Please request the appropriate approval from your leadership in order to proceed.\n\nApproval thresholds:\n• Dollar amount greater than $500 = Manager approval required\n• Dollar amount greater than $10,000 = Director approval required\n• Dollar amount greater than $50,000 = VP approval required\n\nPlease respond with approval or questions within 7 days of this request."
+  },
+  {
+    "shortcut": "//preferred",
+    "expansion": "Per procurement policy, any work performed by a preferred vendor exceeding $10,000 requires at least 2 competing quotes. Please obtain and/or attach a competing quote for this work."
+  },
+  {
+    "shortcut": "//nonpreferred",
+    "expansion": "Per procurement policy, any work by a non-preferred vendor requires at least 2 competing quotes and additional business justification. Please obtain and/or attach a competing quote and justification for this work."
+  },
+  {
+    "shortcut": "//PR",
+    "expansion": "Request has been processed and submitted for Purchase Order. Typical approval time is 3-5 business days.\n\nIMPORTANT: Vendors are not authorized to conduct any services until there is an approved Purchase Order.\n\nSubmitted PR for PO creation: [PR NUMBER]\n\nPO will be issued via automated email to the vendor upon approval.\n\nNotes:\n- You are responsible for receiving any parts ordered upon delivery\n- PM will follow up on any invoice holds for items not received"
+  },
+  {
+    "shortcut": "//quote",
+    "expansion": "Per procurement policy, expenditures over $10,000 require at least 2 competing quotes before approval. Please provide:\n\n1. Quote from current/preferred vendor\n2. Quote from at least one alternative vendor\n\nOnce both quotes are received, we can proceed with approval."
+  },
+  {
+    "shortcut": "//vendor",
+    "expansion": "Invoice No.:\nPOC:\nContact Number:"
+  },
+  {
+    "shortcut": "//status-green",
+    "expansion": "Status: 🟢 On Track — [brief description of progress and next milestone]"
+  },
+  {
+    "shortcut": "//status-yellow",
+    "expansion": "Status: 🟡 At Risk — [what's at risk and why]. Mitigation: [what we're doing about it]"
+  },
+  {
+    "shortcut": "//status-red",
+    "expansion": "Status: 🔴 Behind Schedule — [what's delayed and root cause]. Recovery Plan: [specific actions and revised timeline]"
+  },
+  {
+    "shortcut": "//weekly",
+    "expansion": "Weekly Status — [Project Name]\nWeek of: [date range]\nOverall Status: 🟢 / 🟡 / 🔴\n\nAccomplished This Week:\n- [item 1]\n- [item 2]\n\nPlanned Next Week:\n- [item 1]\n- [item 2]\n\nRisks / Blockers:\n- [risk or blocker, if any]\n\nDecisions Needed:\n- [decision needed, if any]"
+  },
+  {
+    "shortcut": "//monthly",
+    "expansion": "Monthly Status Report — [Project Name]\nPeriod: [Month Year]\nProject Manager: [Name]\n\nExecutive Summary:\n[2-3 sentence overview]\n\nMilestone Progress:\n• [Milestone 1] — [Date] — ✅/🔄/⚠️\n• [Milestone 2] — [Date] — ✅/🔄/⚠️\n\nBudget Status:\n• Approved Budget: $[amount]\n• Spent to Date: $[amount] ([X]%)\n• Forecast at Completion: $[amount]\n\nKey Risks:\n• [Risk] — Impact: [H/M/L] — Mitigation: [Action]\n\nNext Month Focus:\n• [Priority 1]\n• [Priority 2]"
+  },
+  {
+    "shortcut": "//agenda",
+    "expansion": "Meeting Agenda\nDate: [date]\nTime: [time]\nAttendees: [names]\n\nTopics:\n1. [Topic] — [duration] — [presenter]\n2. [Topic] — [duration] — [presenter]\n3. [Topic] — [duration] — [presenter]\n\nPre-Read:\n- [Link or document to review before meeting]"
+  },
+  {
+    "shortcut": "//minutes",
+    "expansion": "Meeting Minutes\nDate: [date]\nAttendees: [names]\n\nDiscussion:\n- [Key point 1]\n- [Key point 2]\n\nDecisions:\n- [Decision made and rationale]\n\nAction Items:\n• [Action] — Owner: [name] — Due: [date]\n• [Action] — Owner: [name] — Due: [date]\n\nNext Meeting: [date/time]"
+  },
+  {
+    "shortcut": "//action",
+    "expansion": "Action: [what needs to be done] | Owner: [who] | Due: [date]"
+  },
+  {
+    "shortcut": "//decision",
+    "expansion": "Decision: [what was decided] | Rationale: [why] | Decided by: [who] | Date: [date]"
+  },
+  {
+    "shortcut": "//followup",
+    "expansion": "Hi [Name],\n\nFollowing up from our meeting on [date]. Here are the key action items:\n\n1. [Action] — Owner: [name] — Due: [date]\n2. [Action] — Owner: [name] — Due: [date]\n\nPlease let me know if anything needs clarification.\n\nThanks."
+  },
+  {
+    "shortcut": "//kickoff",
+    "expansion": "Hi team,\n\nKicking off [Project Name]. Here's what you need to know:\n\nObjective: [what we're delivering]\nTimeline: [start] → [end]\nKey Stakeholders: [names]\nYour Role: [what's expected]\n\nNext Steps:\n1. [First action item]\n2. [Second action item]\n\nKickoff meeting: [date/time/location]\n\nQuestions? Reply here or grab me directly."
+  },
+  {
+    "shortcut": "//escalate",
+    "expansion": "Hi [Manager],\n\nEscalating the following for your attention:\n\nProject: [name]\nIssue: [what's wrong]\nImpact: [what happens if unresolved]\nActions Taken: [what we've already tried]\nAsk: [what we need from you]\nDeadline: [when we need resolution]\n\nHappy to discuss live. Let me know a good time."
+  },
+  {
+    "shortcut": "//milestone",
+    "expansion": "🎉 Milestone Achieved: [milestone name]\n\nProject: [project name]\nCompleted: [date]\nWhat was delivered: [brief description]\nNext milestone: [what's next and when]\n\nThanks to [team/individuals] for making this happen."
+  },
+  {
+    "shortcut": "//closure",
+    "expansion": "Hi team,\n\n[Project Name] is now complete. ✅\n\nKey Outcomes:\n- [Outcome 1]\n- [Outcome 2]\n- [Outcome 3]\n\nFinal Metrics:\n- Budget: $[spent] of $[approved] ([X]% utilization)\n- Timeline: [on time / X days early / X days late]\n- Scope: [delivered as planned / with changes]\n\nThank you all for your contributions."
+  },
+  {
+    "shortcut": "//blocker",
+    "expansion": "Hi [stakeholders],\n\nFlagging a blocker on [Project Name]:\n\nBlocker: [what's blocked]\nBlocked since: [date]\nImpact: [what can't proceed until this is resolved]\nNeeded from: [who can unblock this]\nAsked for: [specific action needed]\n\nPlease advise on resolution path."
+  },
+  {
+    "shortcut": "//ack",
+    "expansion": "Received, thank you. I'll review and follow up by [date]."
+  },
+  {
+    "shortcut": "//defer",
+    "expansion": "Thanks for raising this. I'll add it to our backlog for [next quarter/sprint]. Current priorities prevent us from addressing it immediately, but it's tracked."
+  },
+  {
+    "shortcut": "//needinfo",
+    "expansion": "Thanks for this. Before I can proceed, I need:\n\n1. [Missing information 1]\n2. [Missing information 2]\n\nCan you provide by [date]? That will keep us on track for [milestone]."
+  },
+  {
+    "shortcut": "//delegate",
+    "expansion": "Adding [name] — they own this area and can help. [Name], can you take a look at the below?"
+  },
+  {
+    "shortcut": "//onboard",
+    "expansion": "New Vendor Onboarding Checklist:\n\n☐ Vendor application/registration form completed\n☐ W-9 or tax documentation received\n☐ Insurance certificate on file (if applicable)\n☐ Contract/SOW executed\n☐ Vendor added to payment system\n☐ Primary contact identified and documented\n☐ NDA executed (if applicable)\n☐ Initial PO issued"
+  }
+]

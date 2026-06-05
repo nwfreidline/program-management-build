@@ -14,12 +14,13 @@ Text expansion tools let you type a short abbreviation (like `;appreq`) and have
 
 | Tool | Platform | Cost | Best For |
 |------|----------|------|----------|
-| **Espanso** | Windows/Mac/Linux | Free (open source) | Power users, regex, scripting |
+| **SprintType** ⭐ | Any browser (Chrome/Firefox/Edge) | Free | Browser-based work, zero install, privacy-first |
+| **Espanso** | Windows/Mac/Linux | Free (open source) | System-wide expansion, regex, scripting |
 | **AutoHotKey** | Windows only | Free | Windows-native, maximum flexibility |
 | **PhraseExpress** | Windows/Mac | Free (personal) | GUI-based, easy setup |
 | **TextExpander** | Windows/Mac | $3.33/mo | Team sharing, cloud sync |
 
-**Recommended for this setup: Espanso** — free, cross-platform, supports variables and dynamic content.
+**Recommended for this setup: SprintType** — free, works in any browser, no account required, all data stored locally. Uses `//` as the trigger prefix. See [SprintType-Setup.md](SprintType-Setup.md) for full setup guide.
 
 ---
 
