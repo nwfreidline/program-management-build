@@ -461,19 +461,44 @@ class DocForgeApp(ctk.CTk):
         self.template_choice_var.set("None")
 
     def _open_templates_dir(self):
-        """Open the templates directory in file explorer."""
+        """Import a .docx file as a new template."""
         fmt = self.output_format_var.get()
-        target = os.path.join(TEMPLATES_DIR, fmt) if fmt in TEMPLATE_FORMATS else TEMPLATES_DIR
-        os.makedirs(target, exist_ok=True)
+        template_fmt = "docx" if fmt == "pdf" else fmt
 
-        if sys.platform == "win32":
-            os.startfile(target)
-        elif sys.platform == "darwin":
-            subprocess.run(["open", target])
-        else:
-            subprocess.run(["xdg-open", target])
+        if fmt not in TEMPLATE_FORMATS:
+            messagebox.showinfo("Templates", "Templates are only available for Word and PDF output.")
+            return
 
-        self.after(2000, self._refresh_templates)
+        path = filedialog.askopenfilename(
+            title="Select a template file to import",
+            filetypes=[("Word Documents", "*.docx"), ("All Files", "*.*")],
+        )
+        if not path:
+            return
+
+        import shutil
+
+        target_dir = os.path.join(TEMPLATES_DIR, template_fmt)
+        os.makedirs(target_dir, exist_ok=True)
+
+        filename = os.path.basename(path)
+        dest = os.path.join(target_dir, filename)
+
+        if os.path.exists(dest):
+            overwrite = messagebox.askyesno(
+                "Template Exists",
+                f"A template named '{filename}' already exists.\nOverwrite it?",
+            )
+            if not overwrite:
+                return
+
+        try:
+            shutil.copy2(path, dest)
+            self._refresh_templates()
+            self.template_choice_var.set(filename)
+            self.status_label.configure(text=f"Template added: {filename}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not import template:\n\n{str(e)}")
 
     def _open_template_creator(self):
         """Open the template creator window."""
