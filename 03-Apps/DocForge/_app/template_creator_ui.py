@@ -7,8 +7,8 @@ a reference document, then generates the template and refreshes the list.
 """
 
 import os
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 from pathlib import Path
 
 # Import the builder
@@ -21,15 +21,6 @@ from templates.template_builder import (
     build_template, extract_styles_from_reference,
     FONTS, BODY_SIZES, PAGE_SIZES, MARGINS, LINE_SPACING_MAP, HEADING_STYLES,
 )
-
-# Colors (match main app)
-BG = "#1e1e2e"
-FG = "#cdd6f4"
-ACCENT = "#89b4fa"
-SURFACE = "#313244"
-BORDER = "#45475a"
-MUTED = "#a6adc8"
-GREEN = "#a6e3a1"
 
 
 class TemplateCreatorWindow:
@@ -45,182 +36,213 @@ class TemplateCreatorWindow:
         self.on_complete = on_complete
         self.reference_path = None
 
-        self.win = tk.Toplevel(parent)
+        self.win = ctk.CTkToplevel(parent)
         self.win.title("Create New Template")
-        self.win.configure(bg=BG)
-        self.win.geometry("520x640")
-        self.win.minsize(480, 580)
+        self.win.geometry("560x680")
+        self.win.minsize(500, 600)
         self.win.resizable(True, True)
         self.win.grab_set()  # Modal
 
-        self._build_styles()
         self._build_ui()
 
-    def _build_styles(self):
-        style = ttk.Style()
-        style.configure("Creator.TFrame", background=BG)
-        style.configure("Creator.TLabel", background=BG, foreground=FG, font=("Segoe UI", 9))
-        style.configure("CreatorTitle.TLabel", background=BG, foreground=ACCENT, font=("Segoe UI", 14, "bold"))
-        style.configure("CreatorSection.TLabel", background=BG, foreground=ACCENT, font=("Segoe UI", 10, "bold"))
-        style.configure("CreatorMuted.TLabel", background=BG, foreground=MUTED, font=("Segoe UI", 8))
-        style.configure("Creator.TButton", font=("Segoe UI", 9), padding=(8, 4))
-        style.configure("CreatorCreate.TButton", font=("Segoe UI", 11, "bold"), padding=(16, 8))
-        style.configure("Creator.TCheckbutton", background=BG, foreground=FG, font=("Segoe UI", 9))
-        style.configure("Creator.TCombobox", font=("Segoe UI", 9))
-        style.configure("Creator.TEntry", font=("Segoe UI", 9))
-
     def _build_ui(self):
-        # Scrollable container
-        canvas = tk.Canvas(self.win, bg=BG, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(self.win, orient="vertical", command=canvas.yview)
-        self.scroll_frame = ttk.Frame(canvas, style="Creator.TFrame")
-
-        self.scroll_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True, padx=20, pady=10)
-        scrollbar.pack(side="right", fill="y")
-
-        # Bind mousewheel
-        canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(-1 * (e.delta // 120), "units"))
-
-        f = self.scroll_frame
+        """Build the template creator form."""
+        # Scrollable frame for all content
+        scroll = ctk.CTkScrollableFrame(self.win, fg_color="transparent")
+        scroll.pack(fill="both", expand=True, padx=20, pady=15)
 
         # ── Title ──
-        ttk.Label(f, text="Create New Template", style="CreatorTitle.TLabel").pack(anchor="w", pady=(0, 12))
+        ctk.CTkLabel(
+            scroll,
+            text="Create New Template",
+            font=ctk.CTkFont(size=22, weight="bold"),
+        ).pack(anchor="w", pady=(0, 5))
+
+        ctk.CTkLabel(
+            scroll,
+            text="Configure document formatting for your template.",
+            font=ctk.CTkFont(size=12),
+            text_color=("gray40", "gray60"),
+        ).pack(anchor="w", pady=(0, 20))
 
         # ── Template Name ──
-        self._section_label(f, "Template Name")
-        self.name_var = tk.StringVar()
-        name_entry = ttk.Entry(f, textvariable=self.name_var, width=40, font=("Segoe UI", 10))
-        name_entry.pack(anchor="w", pady=(0, 12))
+        self._section_label(scroll, "Template Name")
+
+        self.name_var = ctk.StringVar()
+        name_entry = ctk.CTkEntry(
+            scroll, textvariable=self.name_var, width=340,
+            height=34, font=ctk.CTkFont(size=12),
+            placeholder_text="e.g. Project Report, Meeting Notes...",
+        )
+        name_entry.pack(anchor="w", pady=(0, 16))
         name_entry.focus_set()
 
         # ── Page Setup ──
-        self._section_label(f, "Page Setup")
+        self._section_label(scroll, "Page Setup")
 
-        row1 = ttk.Frame(f, style="Creator.TFrame")
-        row1.pack(anchor="w", fill="x", pady=(0, 8))
+        page_row = ctk.CTkFrame(scroll, fg_color="transparent")
+        page_row.pack(anchor="w", fill="x", pady=(0, 12))
 
-        self._field_label(row1, "Page Size")
-        self.page_var = tk.StringVar(value="Letter")
-        ttk.Combobox(row1, textvariable=self.page_var, values=list(PAGE_SIZES.keys()),
-                     state="readonly", width=10).pack(side="left", padx=(0, 20))
-
-        self._field_label(row1, "Margins")
-        self.margins_var = tk.StringVar(value="Normal")
-        ttk.Combobox(row1, textvariable=self.margins_var, values=list(MARGINS.keys()),
-                     state="readonly", width=10).pack(side="left")
+        self._field_with_combo(page_row, "Page Size", "page_var", "Letter",
+                               list(PAGE_SIZES.keys()), width=120)
+        self._field_with_combo(page_row, "Margins", "margins_var", "Normal",
+                               list(MARGINS.keys()), width=120)
 
         # ── Typography ──
-        self._section_label(f, "Typography")
+        self._section_label(scroll, "Typography")
 
-        row2 = ttk.Frame(f, style="Creator.TFrame")
-        row2.pack(anchor="w", fill="x", pady=(0, 8))
+        type_row1 = ctk.CTkFrame(scroll, fg_color="transparent")
+        type_row1.pack(anchor="w", fill="x", pady=(0, 8))
 
-        self._field_label(row2, "Font")
-        self.font_var = tk.StringVar(value="Calibri")
-        ttk.Combobox(row2, textvariable=self.font_var, values=FONTS,
-                     state="readonly", width=14).pack(side="left", padx=(0, 20))
+        self._field_with_combo(type_row1, "Font", "font_var", "Calibri",
+                               FONTS, width=150)
+        self._field_with_combo(type_row1, "Size", "size_var", "11",
+                               [str(s) for s in BODY_SIZES], width=80)
 
-        self._field_label(row2, "Size")
-        self.size_var = tk.StringVar(value="11")
-        ttk.Combobox(row2, textvariable=self.size_var, values=[str(s) for s in BODY_SIZES],
-                     state="readonly", width=5).pack(side="left")
+        type_row2 = ctk.CTkFrame(scroll, fg_color="transparent")
+        type_row2.pack(anchor="w", fill="x", pady=(0, 12))
 
-        row3 = ttk.Frame(f, style="Creator.TFrame")
-        row3.pack(anchor="w", fill="x", pady=(0, 8))
-
-        self._field_label(row3, "Line Spacing")
-        self.spacing_var = tk.StringVar(value="Single")
-        ttk.Combobox(row3, textvariable=self.spacing_var, values=list(LINE_SPACING_MAP.keys()),
-                     state="readonly", width=10).pack(side="left", padx=(0, 20))
-
-        self._field_label(row3, "Headings")
-        self.heading_var = tk.StringVar(value="Bold only")
-        ttk.Combobox(row3, textvariable=self.heading_var, values=list(HEADING_STYLES.keys()),
-                     state="readonly", width=14).pack(side="left")
+        self._field_with_combo(type_row2, "Line Spacing", "spacing_var", "Single",
+                               list(LINE_SPACING_MAP.keys()), width=120)
+        self._field_with_combo(type_row2, "Headings", "heading_var", "Bold only",
+                               list(HEADING_STYLES.keys()), width=150)
 
         # ── Header & Footer ──
-        self._section_label(f, "Header & Footer")
+        self._section_label(scroll, "Header & Footer")
 
-        row4 = ttk.Frame(f, style="Creator.TFrame")
-        row4.pack(anchor="w", fill="x", pady=(0, 8))
+        header_row = ctk.CTkFrame(scroll, fg_color="transparent")
+        header_row.pack(anchor="w", fill="x", pady=(0, 8))
 
-        self._field_label(row4, "Header Text")
-        self.header_var = tk.StringVar()
-        ttk.Entry(row4, textvariable=self.header_var, width=36).pack(side="left")
+        ctk.CTkLabel(
+            header_row, text="Header Text",
+            font=ctk.CTkFont(size=12),
+        ).pack(side="left", padx=(0, 10))
 
-        row5 = ttk.Frame(f, style="Creator.TFrame")
-        row5.pack(anchor="w", fill="x", pady=(0, 8))
+        self.header_var = ctk.StringVar()
+        ctk.CTkEntry(
+            header_row, textvariable=self.header_var, width=280, height=32,
+            placeholder_text="Optional header text...",
+        ).pack(side="left")
 
-        self._field_label(row5, "Confidentiality")
-        self.conf_var = tk.StringVar(value="None")
-        ttk.Combobox(row5, textvariable=self.conf_var,
-                     values=["None", "Amazon Confidential", "Internal Only", "Custom..."],
-                     state="readonly", width=20).pack(side="left")
+        conf_row = ctk.CTkFrame(scroll, fg_color="transparent")
+        conf_row.pack(anchor="w", fill="x", pady=(0, 8))
 
-        row5b = ttk.Frame(f, style="Creator.TFrame")
-        row5b.pack(anchor="w", fill="x", pady=(0, 8))
+        self._field_with_combo(conf_row, "Confidentiality", "conf_var", "None",
+                               ["None", "Amazon Confidential", "Internal Only", "Custom..."],
+                               width=180)
 
-        self.page_numbers_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(row5b, text="Include page numbers (Page X of Y)",
-                        variable=self.page_numbers_var,
-                        style="Creator.TCheckbutton").pack(anchor="w")
+        self.page_numbers_var = ctk.BooleanVar(value=True)
+        ctk.CTkCheckBox(
+            scroll,
+            text="Include page numbers (Page X of Y)",
+            variable=self.page_numbers_var,
+            font=ctk.CTkFont(size=12),
+        ).pack(anchor="w", pady=(4, 12))
 
         # ── Reference Document ──
-        self._section_label(f, "Reference Document (optional)")
-        ttk.Label(f, text="Upload a .docx to extract its formatting as a starting point.",
-                  style="CreatorMuted.TLabel").pack(anchor="w", pady=(0, 4))
+        self._section_label(scroll, "Reference Document (optional)")
 
-        ref_row = ttk.Frame(f, style="Creator.TFrame")
-        ref_row.pack(anchor="w", fill="x", pady=(0, 4))
+        ctk.CTkLabel(
+            scroll,
+            text="Upload a .docx to extract its formatting as a starting point.",
+            font=ctk.CTkFont(size=11),
+            text_color=("gray50", "gray60"),
+        ).pack(anchor="w", pady=(0, 8))
 
-        self.ref_label = ttk.Label(ref_row, text="No file selected", style="CreatorMuted.TLabel")
-        self.ref_label.pack(side="left", padx=(0, 10))
+        ref_row = ctk.CTkFrame(scroll, fg_color="transparent")
+        ref_row.pack(anchor="w", fill="x", pady=(0, 16))
 
-        ttk.Button(ref_row, text="Browse", style="Creator.TButton",
-                   command=self._browse_reference).pack(side="left")
-        ttk.Button(ref_row, text="Clear", style="Creator.TButton",
-                   command=self._clear_reference).pack(side="left", padx=(6, 0))
-
-        # ── Spacer ──
-        ttk.Frame(f, height=20, style="Creator.TFrame").pack()
-
-        # ── Create Button ──
-        btn_frame = ttk.Frame(f, style="Creator.TFrame")
-        btn_frame.pack(anchor="w", fill="x", pady=(8, 12))
-
-        create_btn = tk.Button(
-            btn_frame, text="Create Template", font=("Segoe UI", 11, "bold"),
-            bg=ACCENT, fg="#1e1e2e", activebackground="#b4d0fb",
-            relief="flat", cursor="hand2", padx=20, pady=8,
-            command=self._create_template,
+        self.ref_label = ctk.CTkLabel(
+            ref_row,
+            text="No file selected",
+            font=ctk.CTkFont(size=11),
+            text_color=("gray50", "gray60"),
+            anchor="w",
         )
-        create_btn.pack(side="left")
+        self.ref_label.pack(side="left", padx=(0, 12))
 
-        ttk.Button(btn_frame, text="Cancel", style="Creator.TButton",
-                   command=self.win.destroy).pack(side="left", padx=(12, 0))
+        ctk.CTkButton(
+            ref_row, text="Browse", width=80, height=32,
+            fg_color="transparent", border_width=1,
+            hover_color=("gray80", "gray30"),
+            command=self._browse_reference,
+        ).pack(side="left", padx=(0, 6))
 
-        # ── Status ──
-        self.status_var = tk.StringVar(value="")
-        ttk.Label(f, textvariable=self.status_var, style="CreatorMuted.TLabel").pack(anchor="w", pady=(4, 0))
+        ctk.CTkButton(
+            ref_row, text="Clear", width=60, height=32,
+            fg_color="transparent", border_width=1,
+            hover_color=("gray80", "gray30"),
+            command=self._clear_reference,
+        ).pack(side="left")
 
-    # ── Helpers ──
+        # ── Action Buttons ──
+        btn_frame = ctk.CTkFrame(scroll, fg_color="transparent")
+        btn_frame.pack(anchor="w", fill="x", pady=(12, 8))
+
+        ctk.CTkButton(
+            btn_frame,
+            text="Create Template",
+            width=160,
+            height=42,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color="#2e7d32",
+            hover_color="#1b5e20",
+            command=self._create_template,
+        ).pack(side="left")
+
+        ctk.CTkButton(
+            btn_frame,
+            text="Cancel",
+            width=90,
+            height=42,
+            fg_color="gray50",
+            hover_color="gray40",
+            command=self.win.destroy,
+        ).pack(side="left", padx=(12, 0))
+
+        # Status
+        self.status_label = ctk.CTkLabel(
+            scroll,
+            text="",
+            font=ctk.CTkFont(size=11),
+            text_color=("gray50", "gray60"),
+        )
+        self.status_label.pack(anchor="w", pady=(8, 0))
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
 
     def _section_label(self, parent, text):
-        ttk.Label(parent, text=text, style="CreatorSection.TLabel").pack(anchor="w", pady=(12, 4))
+        """Create a section header label."""
+        ctk.CTkLabel(
+            parent,
+            text=text,
+            font=ctk.CTkFont(size=14, weight="bold"),
+        ).pack(anchor="w", pady=(12, 6))
 
-    def _field_label(self, parent, text):
-        ttk.Label(parent, text=text, style="Creator.TLabel").pack(side="left", padx=(0, 6))
+    def _field_with_combo(self, parent, label, var_name, default, values, width=120):
+        """Create a label + combobox pair packed side by side."""
+        ctk.CTkLabel(
+            parent, text=label,
+            font=ctk.CTkFont(size=12),
+        ).pack(side="left", padx=(0, 8))
 
-    # ── Reference doc ──
+        var = ctk.StringVar(value=default)
+        setattr(self, var_name, var)
+
+        combo = ctk.CTkComboBox(
+            parent, values=values, variable=var,
+            width=width, height=32, state="readonly",
+        )
+        combo.pack(side="left", padx=(0, 20))
+
+    # ------------------------------------------------------------------
+    # Reference Document
+    # ------------------------------------------------------------------
 
     def _browse_reference(self):
+        """Browse for a reference .docx file."""
         path = filedialog.askopenfilename(
             filetypes=[("Word Documents", "*.docx"), ("All Files", "*.*")],
             title="Select Reference Document",
@@ -229,18 +251,30 @@ class TemplateCreatorWindow:
             self.reference_path = path
             name = os.path.basename(path)
             display = name if len(name) <= 35 else name[:32] + "..."
-            self.ref_label.configure(text=f"✅ {display}")
+            self.ref_label.configure(
+                text=f"✅ {display}",
+                text_color=("gray10", "white"),
+            )
 
     def _clear_reference(self):
+        """Clear the reference document selection."""
         self.reference_path = None
-        self.ref_label.configure(text="No file selected")
+        self.ref_label.configure(
+            text="No file selected",
+            text_color=("gray50", "gray60"),
+        )
 
-    # ── Create ──
+    # ------------------------------------------------------------------
+    # Create Template
+    # ------------------------------------------------------------------
 
     def _create_template(self):
+        """Build the template from form values."""
         name = self.name_var.get().strip()
         if not name:
-            messagebox.showwarning("Name Required", "Please enter a template name.", parent=self.win)
+            messagebox.showwarning(
+                "Name Required", "Please enter a template name.", parent=self.win
+            )
             return
 
         # Check for duplicate
@@ -256,7 +290,7 @@ class TemplateCreatorWindow:
             if not overwrite:
                 return
 
-        self.status_var.set("Creating template...")
+        self.status_label.configure(text="Creating template...")
         self.win.update()
 
         try:
@@ -268,7 +302,8 @@ class TemplateCreatorWindow:
                 except Exception as e:
                     messagebox.showwarning(
                         "Reference Warning",
-                        f"Could not fully extract styles from reference doc:\n{e}\n\nProceeding with manual selections.",
+                        f"Could not fully extract styles from reference doc:\n{e}\n\n"
+                        "Proceeding with manual selections.",
                         parent=self.win,
                     )
 
@@ -293,7 +328,7 @@ class TemplateCreatorWindow:
                 reference_params=ref_params,
             )
 
-            self.status_var.set(f"✅ Created: {os.path.basename(output_path)}")
+            self.status_label.configure(text=f"✅ Created: {os.path.basename(output_path)}")
 
             # Notify parent to refresh template list
             if self.on_complete:
@@ -301,11 +336,14 @@ class TemplateCreatorWindow:
 
             messagebox.showinfo(
                 "Template Created",
-                f"Template saved:\n{os.path.basename(output_path)}\n\nIt's now available in the template dropdown.",
+                f"Template saved:\n{os.path.basename(output_path)}\n\n"
+                "It's now available in the template dropdown.",
                 parent=self.win,
             )
             self.win.destroy()
 
         except Exception as e:
-            self.status_var.set(f"❌ Error: {str(e)[:60]}")
-            messagebox.showerror("Error", f"Failed to create template:\n\n{str(e)}", parent=self.win)
+            self.status_label.configure(text=f"❌ Error: {str(e)[:60]}")
+            messagebox.showerror(
+                "Error", f"Failed to create template:\n\n{str(e)}", parent=self.win
+            )

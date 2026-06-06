@@ -1,6 +1,9 @@
 # DocForge Dependencies
 # Install with: pip install -r requirements.txt
 
+# UI framework
+customtkinter==5.2.2
+
 # Core — Word (.docx) read/write
 python-docx==1.2.0
 

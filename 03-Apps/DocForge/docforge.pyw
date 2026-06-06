@@ -6,9 +6,9 @@ With template-aware output.
 
 import os
 import sys
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
 import subprocess
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 
 # Hide the background console window on Windows
 if sys.platform == "win32":
@@ -44,231 +44,323 @@ FORMAT_LABELS = {
 
 TEMPLATE_FORMATS = {"docx", "pdf"}
 
-# Colors
-BG = "#1e1e2e"
-FG = "#cdd6f4"
-ACCENT = "#89b4fa"
-SURFACE = "#313244"
-BORDER = "#45475a"
-MUTED = "#a6adc8"
-GREEN = "#a6e3a1"
 
+class DocForgeApp(ctk.CTk):
+    """Main DocForge application window."""
 
-class DocForgeApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("DocForge")
-        self.root.configure(bg=BG)
-        self.root.resizable(True, True)
+    def __init__(self):
+        super().__init__()
+
+        # Configure window
+        self.title("DocForge")
+        self.geometry("960x400")
+        self.minsize(900, 360)
+
+        # Theme
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")
 
         # State
-        self.input_path = tk.StringVar()
-        self.output_format = tk.StringVar(value="docx")
-        self.template_choice = tk.StringVar(value="None")
-        self.dest_dir = tk.StringVar()
-        self.open_after = tk.BooleanVar(value=True)
-        self.status_text = tk.StringVar(value="Ready")
+        self.input_path = ""
+        self.output_format_var = ctk.StringVar(value="docx")
+        self.template_choice_var = ctk.StringVar(value="None")
+        self.dest_dir = ""
 
         os.makedirs(TEMPLATES_DIR, exist_ok=True)
 
-        self._build_styles()
-        self._build_ui()
-        self._setup_drag_and_drop()
+        # Build UI
+        self._build_nav()
+        self._build_content()
+        self._build_status_bar()
 
-        # Set initial size — wide and comfortable
-        self.root.geometry("960x360")
-        self.root.minsize(860, 300)
+    # ------------------------------------------------------------------
+    # Navigation Bar
+    # ------------------------------------------------------------------
 
-    def _build_styles(self):
-        style = ttk.Style()
-        style.theme_use("clam")
+    def _build_nav(self):
+        """Build the top navigation bar."""
+        self.nav_frame = ctk.CTkFrame(self, height=45, corner_radius=0)
+        self.nav_frame.pack(fill="x")
+        self.nav_frame.pack_propagate(False)
 
-        style.configure("TFrame", background=BG)
-        style.configure("TLabel", background=BG, foreground=FG, font=("Segoe UI", 9))
-        style.configure("Title.TLabel", background=BG, foreground=ACCENT, font=("Segoe UI", 16, "bold"))
-        style.configure("Status.TLabel", background=BG, foreground=MUTED, font=("Segoe UI", 9))
-        style.configure("Step.TLabel", background=BG, foreground=MUTED, font=("Segoe UI", 8))
-        style.configure("Arrow.TLabel", background=BG, foreground=BORDER, font=("Segoe UI", 22, "bold"))
-        style.configure("FmtDesc.TLabel", background=BG, foreground=MUTED, font=("Segoe UI", 8))
-        style.configure("TButton", font=("Segoe UI", 9), padding=(6, 2))
-        style.configure("Convert.TButton", font=("Segoe UI", 10, "bold"), padding=(12, 8))
-        style.configure("Small.TButton", font=("Segoe UI", 8), padding=(6, 1))
-        style.configure("TCheckbutton", background=BG, foreground=FG, font=("Segoe UI", 9))
-        style.configure("TCombobox", font=("Segoe UI", 9), justify="center")
+        ctk.CTkLabel(
+            self.nav_frame,
+            text="⚡ DocForge",
+            font=ctk.CTkFont(size=14, weight="bold"),
+        ).pack(side="left", padx=15)
 
-    def _build_ui(self):
-        # ── Outer container: centers content both axes ──
-        outer = ttk.Frame(self.root)
-        outer.pack(fill="both", expand=True)
-        outer.rowconfigure(0, weight=1)
-        outer.rowconfigure(1, weight=0)  # title
-        outer.rowconfigure(2, weight=0)  # flow
-        outer.rowconfigure(3, weight=0)  # status
-        outer.rowconfigure(4, weight=1)
-        outer.columnconfigure(0, weight=1)
+        # Theme toggle (right side)
+        self.theme_btn = ctk.CTkButton(
+            self.nav_frame,
+            text="🌙",
+            width=35,
+            height=30,
+            font=ctk.CTkFont(size=14),
+            fg_color="transparent",
+            text_color=("gray20", "gray90"),
+            hover_color=("gray80", "gray30"),
+            command=self._toggle_theme,
+        )
+        self.theme_btn.pack(side="right", padx=10)
 
-        # ── Title ──
-        ttk.Label(outer, text="DocForge", style="Title.TLabel").grid(
-            row=1, column=0, pady=(0, 20))
+    # ------------------------------------------------------------------
+    # Main Content — Horizontal Pipeline Flow
+    # ------------------------------------------------------------------
 
-        # ── Flow: single horizontal row of "cards", each card is a vertical stack ──
-        # Each card is its own frame with internal vertical layout,
-        # and the cards are packed side-by-side with vertical centering via grid.
-        flow = ttk.Frame(outer)
+    def _build_content(self):
+        """Build the main content area with horizontal card flow."""
+        content = ctk.CTkFrame(self, fg_color="transparent")
+        content.pack(fill="both", expand=True)
+
+        # Center the flow vertically and horizontally
+        content.grid_rowconfigure(0, weight=1)
+        content.grid_rowconfigure(1, weight=0)  # title
+        content.grid_rowconfigure(2, weight=0)  # flow
+        content.grid_rowconfigure(3, weight=1)
+        content.grid_columnconfigure(0, weight=1)
+
+        # Title
+        ctk.CTkLabel(
+            content,
+            text="DocForge",
+            font=ctk.CTkFont(size=22, weight="bold"),
+        ).grid(row=1, column=0, pady=(0, 20))
+
+        # ── Horizontal flow container using grid rows for alignment ──
+        # Row 0: headers (FORMAT, TEMPLATE, DESTINATION)
+        # Row 1: main controls (Browse, dropdown, dropdown, Choose, Convert) — all aligned
+        # Row 2: sub-labels (No file selected, Word (.docx), Add/Create, Same as input)
+        flow = ctk.CTkFrame(content, fg_color="transparent")
         flow.grid(row=2, column=0)
-
-        # Single row, all items vertically centered
-        flow.rowconfigure(0, weight=0)
 
         col = 0
 
-        # ═══ Card 1: Drop zone ═══
-        card1 = ttk.Frame(flow)
-        flow.columnconfigure(col, weight=0)
-        card1.grid(row=0, column=col, padx=(0, 4))  # no sticky = centered
+        # ═══ Card 1: Browse ═══
+        # Row 0: empty header spacer
+        # Row 1: Browse button
+        # Row 2: "No file selected"
+        ctk.CTkLabel(flow, text="", font=ctk.CTkFont(size=10)).grid(row=0, column=col)
 
-        ttk.Label(card1, text="DOC TYPE", style="Step.TLabel").pack()
+        ctk.CTkButton(
+            flow,
+            text="Browse",
+            width=100,
+            height=34,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color="#1565c0",
+            hover_color="#0d47a1",
+            command=self._browse_file,
+        ).grid(row=1, column=col, padx=(0, 4))
 
-        self.drop_frame = tk.Frame(
-            card1, bg=SURFACE, highlightbackground=BORDER,
-            highlightthickness=2, cursor="hand2",
-            width=120, height=120
+        self.source_label = ctk.CTkLabel(
+            flow,
+            text="No file selected",
+            font=ctk.CTkFont(size=10),
+            text_color=("gray50", "gray60"),
         )
-        self.drop_frame.pack(pady=(3, 0))
-        self.drop_frame.pack_propagate(False)
+        self.source_label.grid(row=2, column=col, padx=(0, 4), pady=(4, 0))
 
-        self.drop_label = tk.Label(
-            self.drop_frame, text="📄 Drop file\nor browse",
-            bg=SURFACE, fg=MUTED, font=("Segoe UI", 9),
-            cursor="hand2", justify="center"
-        )
-        self.drop_label.pack(expand=True)
-        self.drop_frame.bind("<Button-1>", lambda e: self._browse_file())
-        self.drop_label.bind("<Button-1>", lambda e: self._browse_file())
-
-        # ═══ Arrow ═══
+        # ═══ Arrow 1 ═══
         col += 1
-        ttk.Label(flow, text="→", style="Arrow.TLabel").grid(
-            row=0, column=col, padx=6)
+        ctk.CTkLabel(
+            flow, text="→",
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=("gray70", "gray40"),
+        ).grid(row=1, column=col, padx=6)
 
         # ═══ Card 2: Format ═══
         col += 1
-        card2 = ttk.Frame(flow)
-        card2.grid(row=0, column=col, padx=4)
+        ctk.CTkLabel(
+            flow,
+            text="FORMAT",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            text_color=("gray40", "gray60"),
+        ).grid(row=0, column=col, pady=(0, 6))
 
-        ttk.Label(card2, text="FORMAT", style="Step.TLabel").pack()
-
-        self.format_combo = ttk.Combobox(
-            card2, textvariable=self.output_format,
+        self.format_combo = ctk.CTkComboBox(
+            flow,
             values=list(FORMAT_LABELS.keys()),
-            state="readonly", width=14, justify="center"
+            variable=self.output_format_var,
+            width=120,
+            height=34,
+            state="readonly",
+            command=self._on_format_change,
         )
-        self.format_combo.pack(pady=(3, 0))
-        self.format_combo.bind("<<ComboboxSelected>>", self._on_format_change)
+        self.format_combo.grid(row=1, column=col, padx=4)
 
-        self.format_desc = ttk.Label(card2, text="Word (.docx)", style="FmtDesc.TLabel")
-        self.format_desc.pack(pady=(3, 0))
+        self.format_desc_label = ctk.CTkLabel(
+            flow,
+            text="Word (.docx)",
+            font=ctk.CTkFont(size=10),
+            text_color=("gray50", "gray60"),
+        )
+        self.format_desc_label.grid(row=2, column=col, padx=4, pady=(4, 0))
 
-        # ═══ Arrow ═══
+        # ═══ Arrow 2 ═══
         col += 1
-        ttk.Label(flow, text="→", style="Arrow.TLabel").grid(
-            row=0, column=col, padx=6)
+        ctk.CTkLabel(
+            flow, text="→",
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=("gray70", "gray40"),
+        ).grid(row=1, column=col, padx=6)
 
         # ═══ Card 3: Template ═══
         col += 1
-        card3 = ttk.Frame(flow)
-        card3.grid(row=0, column=col, padx=4)
+        ctk.CTkLabel(
+            flow,
+            text="TEMPLATE",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            text_color=("gray40", "gray60"),
+        ).grid(row=0, column=col, pady=(0, 6))
 
-        # Use grid layout for vertical centering within the card
-        card3.rowconfigure(0, weight=1)  # top spacer
-        card3.rowconfigure(1, weight=0)  # TEMPLATE label
-        card3.rowconfigure(2, weight=0)  # dropdown
-        card3.rowconfigure(3, weight=0)  # buttons
-        card3.rowconfigure(4, weight=1)  # bottom spacer
-
-        ttk.Label(card3, text="TEMPLATE", style="Step.TLabel").grid(row=1, column=0, pady=(0, 3))
-
-        self.template_combo = ttk.Combobox(
-            card3, textvariable=self.template_choice,
-            state="readonly", width=28, justify="center"
+        self.template_combo = ctk.CTkComboBox(
+            flow,
+            values=["None"],
+            variable=self.template_choice_var,
+            width=190,
+            height=34,
+            state="readonly",
         )
-        self.template_combo.grid(row=2, column=0, pady=(0, 3))
-        self._refresh_templates()
+        self.template_combo.grid(row=1, column=col, padx=4)
 
-        btn_frame = ttk.Frame(card3)
-        btn_frame.grid(row=3, column=0)
-        ttk.Button(btn_frame, text="Add New", style="Small.TButton",
-                   command=self._open_templates_dir).pack(side="left", padx=(0, 4))
-        ttk.Button(btn_frame, text="Create New", style="Small.TButton",
-                   command=self._open_template_creator).pack(side="left")
+        btn_row = ctk.CTkFrame(flow, fg_color="transparent")
+        btn_row.grid(row=2, column=col, padx=4, pady=(4, 0))
 
-        # ═══ Arrow ═══
+        ctk.CTkButton(
+            btn_row,
+            text="Add New",
+            width=70,
+            height=26,
+            font=ctk.CTkFont(size=10),
+            fg_color="transparent",
+            text_color=("gray20", "gray90"),
+            border_width=1,
+            hover_color=("gray80", "gray30"),
+            command=self._open_templates_dir,
+        ).pack(side="left", padx=(0, 4))
+
+        ctk.CTkButton(
+            btn_row,
+            text="Create New",
+            width=80,
+            height=26,
+            font=ctk.CTkFont(size=10),
+            fg_color="transparent",
+            text_color=("gray20", "gray90"),
+            border_width=1,
+            hover_color=("gray80", "gray30"),
+            command=self._open_template_creator,
+        ).pack(side="left")
+
+        # ═══ Arrow 3 ═══
         col += 1
-        ttk.Label(flow, text="→", style="Arrow.TLabel").grid(
-            row=0, column=col, padx=6)
+        ctk.CTkLabel(
+            flow, text="→",
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=("gray70", "gray40"),
+        ).grid(row=1, column=col, padx=6)
 
         # ═══ Card 4: Destination ═══
         col += 1
-        card4 = ttk.Frame(flow)
-        card4.grid(row=0, column=col, padx=4)
+        ctk.CTkLabel(
+            flow,
+            text="DESTINATION",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            text_color=("gray40", "gray60"),
+        ).grid(row=0, column=col, pady=(0, 6))
 
-        ttk.Label(card4, text="DESTINATION", style="Step.TLabel").pack()
+        ctk.CTkButton(
+            flow,
+            text="Choose",
+            width=120,
+            height=34,
+            font=ctk.CTkFont(size=11),
+            fg_color="transparent",
+            text_color=("gray20", "gray90"),
+            border_width=1,
+            hover_color=("gray80", "gray30"),
+            command=self._browse_dest,
+        ).grid(row=1, column=col, padx=4)
 
-        self.dest_entry = ttk.Entry(card4, textvariable=self.dest_dir, width=16, justify="center")
-        self.dest_entry.pack(pady=(3, 0))
-        self.dest_entry.insert(0, "Same as input")
-        self.dest_entry.configure(state="readonly")
+        self.dest_label = ctk.CTkLabel(
+            flow,
+            text="Same as input",
+            font=ctk.CTkFont(size=10),
+            text_color=("gray50", "gray60"),
+        )
+        self.dest_label.grid(row=2, column=col, padx=4, pady=(4, 0))
 
-        ttk.Button(card4, text="Choose", style="Small.TButton",
-                   command=self._browse_dest).pack(pady=(3, 0))
-
-        # ═══ Arrow ═══
+        # ═══ Arrow 4 ═══
         col += 1
-        ttk.Label(flow, text="→", style="Arrow.TLabel").grid(
-            row=0, column=col, padx=6)
+        ctk.CTkLabel(
+            flow, text="→",
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=("gray70", "gray40"),
+        ).grid(row=1, column=col, padx=6)
 
         # ═══ Card 5: Convert ═══
         col += 1
-        card5 = ttk.Frame(flow)
-        card5.grid(row=0, column=col, padx=(4, 0))
+        ctk.CTkLabel(flow, text="", font=ctk.CTkFont(size=10)).grid(row=0, column=col)
 
-        # Invisible spacer label to match the "LABEL" row on other cards
-        ttk.Label(card5, text="", style="Step.TLabel").pack()
+        ctk.CTkButton(
+            flow,
+            text="Convert",
+            width=100,
+            height=34,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color="#2e7d32",
+            hover_color="#1b5e20",
+            command=self._do_convert,
+        ).grid(row=1, column=col, padx=(4, 0))
 
-        self.convert_btn = tk.Frame(card5, bg=SURFACE, highlightbackground=BORDER,
-            highlightthickness=2, cursor="hand2", width=120, height=120)
-        self.convert_btn.pack(pady=(3, 0))
-        self.convert_btn.pack_propagate(False)
+        # Refresh templates on load
+        self._refresh_templates()
+        self._setup_drag_and_drop()
 
-        convert_label = tk.Label(
-            self.convert_btn, text="Convert",
-            bg=SURFACE, fg=FG, font=("Segoe UI", 11, "bold"),
-            cursor="hand2"
+    # ------------------------------------------------------------------
+    # Status Bar
+    # ------------------------------------------------------------------
+
+    def _build_status_bar(self):
+        """Build the bottom status bar."""
+        self.status_bar = ctk.CTkFrame(self, height=28, corner_radius=0)
+        self.status_bar.pack(fill="x", side="bottom")
+        self.status_bar.pack_propagate(False)
+
+        self.status_label = ctk.CTkLabel(
+            self.status_bar,
+            text="Ready",
+            font=ctk.CTkFont(size=11),
+            text_color=("gray50", "gray60"),
         )
-        convert_label.pack(expand=True)
-        self.convert_btn.bind("<Button-1>", lambda e: self._do_convert())
-        convert_label.bind("<Button-1>", lambda e: self._do_convert())
+        self.status_label.pack(side="left", padx=12)
 
-        ttk.Checkbutton(
-            card5, text="Open after conversion",
-            variable=self.open_after
-        ).pack(pady=(4, 0))
+    # ------------------------------------------------------------------
+    # Theme Toggle
+    # ------------------------------------------------------------------
 
-        # ── Status ──
-        ttk.Label(outer, textvariable=self.status_text, style="Status.TLabel").grid(
-            row=3, column=0, pady=(16, 10))
+    def _toggle_theme(self):
+        """Toggle between dark and light theme."""
+        current = ctk.get_appearance_mode().lower()
+        new_theme = "light" if current == "dark" else "dark"
+        ctk.set_appearance_mode(new_theme)
+        self.theme_btn.configure(text="🌙" if new_theme == "dark" else "☀️")
 
-    # ── Drag and Drop ────────────────────────────────────────────
+    # ------------------------------------------------------------------
+    # Drag and Drop
+    # ------------------------------------------------------------------
 
     def _setup_drag_and_drop(self):
+        """Set up drag and drop support if tkinterdnd2 is available."""
         try:
             from tkinterdnd2 import DND_FILES
-            self.root.drop_target_register(DND_FILES)
-            self.root.dnd_bind("<<Drop>>", self._on_drop)
+            self.drop_target_register(DND_FILES)
+            self.dnd_bind("<<Drop>>", self._on_drop)
         except Exception:
-            self.drop_label.configure(text="📄 Click\nto browse")
+            pass
 
     def _on_drop(self, event):
+        """Handle dropped file."""
         path = event.data.strip()
         if path.startswith("{") and path.endswith("}"):
             path = path[1:-1]
@@ -276,9 +368,12 @@ class DocForgeApp:
             path = path.split("\n")[0].strip()
         self._set_input_file(path)
 
-    # ── File Selection ───────────────────────────────────────────
+    # ------------------------------------------------------------------
+    # File Selection
+    # ------------------------------------------------------------------
 
     def _browse_file(self):
+        """Open file dialog to select input file."""
         filetypes = [
             ("All Supported", "*.md *.markdown *.docx *.pdf *.html *.htm *.txt *.msg *.eml"),
             ("Markdown", "*.md *.markdown"),
@@ -294,53 +389,64 @@ class DocForgeApp:
             self._set_input_file(path)
 
     def _set_input_file(self, path):
+        """Set the input file and update the UI."""
         if not os.path.isfile(path):
-            self.status_text.set("Error: File not found")
+            self.status_label.configure(text="Error: File not found")
             return
 
         fmt = detect_format(path)
         if not fmt:
-            self.status_text.set("Error: Unsupported file type")
+            self.status_label.configure(text="Error: Unsupported file type")
             return
 
-        self.input_path.set(path)
+        self.input_path = path
         filename = os.path.basename(path)
         display = filename if len(filename) <= 18 else filename[:15] + "..."
-        self.drop_label.configure(text=f"✅ {display}", fg=GREEN)
-        self.status_text.set(f"Loaded: {filename} ({fmt})")
+        self.source_label.configure(
+            text=f"✅ {display}",
+            text_color=("gray10", "white"),
+        )
+        self.status_label.configure(text=f"Loaded: {filename} ({fmt})")
 
+        # Auto-select format
         auto_map = {
             "markdown": "docx", "docx": "markdown", "msg": "docx",
             "eml": "docx", "pdf": "docx", "html": "markdown", "txt": "markdown",
         }
-        self.output_format.set(auto_map.get(fmt, "docx"))
-        self._on_format_change()
+        self.output_format_var.set(auto_map.get(fmt, "docx"))
+        self._on_format_change(auto_map.get(fmt, "docx"))
 
-    # ── Destination ──────────────────────────────────────────────
+    # ------------------------------------------------------------------
+    # Destination
+    # ------------------------------------------------------------------
 
     def _browse_dest(self):
+        """Open directory dialog for output destination."""
         directory = filedialog.askdirectory()
         if directory:
-            self.dest_dir.set(directory)
+            self.dest_dir = directory
             display = os.path.basename(directory) or directory
-            self.dest_entry.configure(state="normal")
-            self.dest_entry.delete(0, tk.END)
-            self.dest_entry.insert(0, display)
-            self.dest_entry.configure(state="readonly")
+            self.dest_label.configure(
+                text=display,
+                text_color=("gray10", "white"),
+            )
 
-    # ── Format / Template ────────────────────────────────────────
+    # ------------------------------------------------------------------
+    # Format / Template
+    # ------------------------------------------------------------------
 
-    def _on_format_change(self, event=None):
-        fmt = self.output_format.get()
-        self.format_desc.configure(text=FORMAT_LABELS.get(fmt, fmt))
+    def _on_format_change(self, choice=None):
+        """Handle format selection change."""
+        fmt = self.output_format_var.get()
+        self.format_desc_label.configure(text=FORMAT_LABELS.get(fmt, fmt))
         self._refresh_templates()
 
     def _refresh_templates(self):
-        fmt = self.output_format.get()
+        """Refresh the template dropdown based on selected format."""
+        fmt = self.output_format_var.get()
         templates = ["None"]
 
         if fmt in TEMPLATE_FORMATS:
-            # PDF uses the same templates as docx (style definitions)
             template_fmt = "docx" if fmt == "pdf" else fmt
             fmt_dir = os.path.join(TEMPLATES_DIR, template_fmt)
             if os.path.isdir(fmt_dir):
@@ -351,11 +457,12 @@ class DocForgeApp:
         else:
             self.template_combo.configure(state="disabled")
 
-        self.template_combo["values"] = templates
-        self.template_choice.set("None")
+        self.template_combo.configure(values=templates)
+        self.template_choice_var.set("None")
 
     def _open_templates_dir(self):
-        fmt = self.output_format.get()
+        """Open the templates directory in file explorer."""
+        fmt = self.output_format_var.get()
         target = os.path.join(TEMPLATES_DIR, fmt) if fmt in TEMPLATE_FORMATS else TEMPLATES_DIR
         os.makedirs(target, exist_ok=True)
 
@@ -366,73 +473,70 @@ class DocForgeApp:
         else:
             subprocess.run(["xdg-open", target])
 
-        self.root.after(2000, self._refresh_templates)
+        self.after(2000, self._refresh_templates)
 
     def _open_template_creator(self):
         """Open the template creator window."""
         def on_template_created(filename):
             self._refresh_templates()
-            # Auto-select the newly created template
-            self.template_choice.set(filename)
-            self.status_text.set(f"Template created: {filename}")
+            self.template_choice_var.set(filename)
+            self.status_label.configure(text=f"Template created: {filename}")
 
-        TemplateCreatorWindow(self.root, on_complete=on_template_created)
+        TemplateCreatorWindow(self, on_complete=on_template_created)
 
-    # ── Conversion ───────────────────────────────────────────────
+    # ------------------------------------------------------------------
+    # Conversion
+    # ------------------------------------------------------------------
 
     def _do_convert(self):
-        input_path = self.input_path.get()
-        if not input_path or not os.path.isfile(input_path):
+        """Perform the document conversion."""
+        if not self.input_path or not os.path.isfile(self.input_path):
             messagebox.showwarning("No File", "Please select a file to convert.")
             return
 
-        output_format = self.output_format.get()
+        output_format = self.output_format_var.get()
 
         template_path = None
-        if self.template_choice.get() != "None" and output_format in TEMPLATE_FORMATS:
-            # PDF uses the same template files as docx (style definitions)
+        if self.template_choice_var.get() != "None" and output_format in TEMPLATE_FORMATS:
             template_fmt = "docx" if output_format == "pdf" else output_format
-            template_path = os.path.join(TEMPLATES_DIR, template_fmt, self.template_choice.get())
+            template_path = os.path.join(
+                TEMPLATES_DIR, template_fmt, self.template_choice_var.get()
+            )
             if not os.path.isfile(template_path):
                 template_path = None
 
-        dest = self.dest_dir.get()
-        output_dir = None if (not dest or dest == "Same as input") else dest
+        output_dir = None if (not self.dest_dir or self.dest_dir == "Same as input") else self.dest_dir
 
-        self.status_text.set("Converting...")
-        self.root.update()
+        self.status_label.configure(text="Converting...")
+        self.update()
 
         try:
             output_path = convert(
-                input_path=input_path,
+                input_path=self.input_path,
                 output_format=output_format,
                 output_dir=output_dir,
                 template_path=template_path,
             )
-            self.status_text.set(f"✅ Saved: {os.path.basename(output_path)}")
+            self.status_label.configure(
+                text=f"✅ Saved: {os.path.basename(output_path)}"
+            )
 
-            if self.open_after.get():
-                if sys.platform == "win32":
-                    os.startfile(output_path)
-                elif sys.platform == "darwin":
-                    subprocess.run(["open", output_path])
-                else:
-                    subprocess.run(["xdg-open", output_path])
+            # Always open after conversion
+            if sys.platform == "win32":
+                os.startfile(output_path)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", output_path])
+            else:
+                subprocess.run(["xdg-open", output_path])
 
         except Exception as e:
-            self.status_text.set(f"❌ Error: {str(e)[:80]}")
+            self.status_label.configure(text=f"❌ Error: {str(e)[:80]}")
             messagebox.showerror("Conversion Error", f"Failed to convert:\n\n{str(e)}")
 
 
 def main():
-    try:
-        from tkinterdnd2 import TkinterDnD
-        root = TkinterDnD.Tk()
-    except Exception:
-        root = tk.Tk()
-
-    DocForgeApp(root)
-    root.mainloop()
+    app = DocForgeApp()
+    app.mainloop()
 
 
 if __name__ == "__main__":
